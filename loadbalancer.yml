@@ -1,0 +1,37 @@
+- hosts: webserver
+  tasks:
+  - name: "install httpd rpm"
+    package:
+          name: "httpd"
+
+  - name: "copy file to documentroot"
+    copy: 
+          dest: "/var/www/html/index.html"
+          content: "for harshil loadbalancer and reverse proxy"
+
+  - name: "starting service"
+    service:
+          name: "httpd"
+          state: restarted
+
+  - name: "stop firewall"
+    service:
+          name: "firewalld"
+          state: stopped
+
+
+- hosts: loadbalancer
+  vars:
+          - port_no: 8080
+  tasks:
+  - name: "install haproxy rpm"
+    package:
+          name: "haproxy"
+
+  - template:
+          dest: "/etc/haproxy/haproxy.cfg"
+          src: "haproxy.cfg.j2"
+
+  - service:
+          name: "haproxy"
+          state: restarted
